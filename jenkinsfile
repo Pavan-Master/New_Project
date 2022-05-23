@@ -1,0 +1,26 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Pavan-Master/New_Project.git'
+            }
+        }
+		stage('Build & Test') {
+            steps {
+                echo '***********Compiling And Testing**********'
+                sh './mvnw compile test package'
+            }
+        }
+		stage('Image build') {
+            steps {
+	
+				sh 'cp /opt/siddhi/Dockerfile /var/lib/jenkins/workspace/${JOB_NAME}'
+                sh 'docker build -t techverito:v1 .'
+                sh 'docker rm -f techverito'
+				sh 'docker run -itd -p 80:8080 --name techverito techverito:v1'
+            }
+        }
+    }
+}
